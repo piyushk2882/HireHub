@@ -19,7 +19,7 @@ const getCsrfCookieOptions = () => {
 
   return {
     httpOnly: false, // Angular needs to read this cookie to populate X-XSRF-TOKEN header
-    secure: isProd,
+    secure: isProd && process.env.COOKIE_SECURE !== "false",
     sameSite: sameSite,
     path: "/"
   };
