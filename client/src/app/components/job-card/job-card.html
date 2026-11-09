@@ -1,0 +1,65 @@
+<article class="job-card" [class.is-featured]="job.featured">
+  <div class="card-header">
+    <div
+      class="company-logo"
+      [style.background-color]="avatarInfo.bg"
+      [style.color]="avatarInfo.color"
+      [attr.aria-label]="companyName + ' logo'"
+    >
+      {{ avatarInfo.text }}
+    </div>
+
+    <div class="badges-wrapper">
+      @if (job.featured) {
+        <span class="badge badge-featured">Featured</span>
+      }
+      <span class="badge badge-category">{{ job.category }}</span>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <h3 class="job-title">{{ job.title }}</h3>
+    <p class="company-name">{{ companyName }}</p>
+
+    <div class="job-meta">
+      <div class="meta-item">
+        <svg class="meta-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+          <circle cx="12" cy="10" r="3"></circle>
+        </svg>
+        <span>{{ job.location }}</span>
+      </div>
+
+      <div class="meta-item">
+        <svg class="meta-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        <span>{{ employmentTypeDisplay }}</span>
+      </div>
+    </div>
+
+    @if (job.skills && job.skills.length > 0) {
+      <div class="skills-list">
+        @for (skill of job.skills.slice(0, 3); track skill) {
+          <span class="skill-tag">{{ skill }}</span>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="card-footer">
+    <div class="salary-container">
+      <span class="salary-label">Salary</span>
+      <strong class="salary-amount">{{ displaySalary }}</strong>
+    </div>
+
+    <a [routerLink]="['/jobs', jobId]" class="btn-view-details">
+      View Details
+      <svg class="btn-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+        <polyline points="12 5 19 12 12 19"></polyline>
+      </svg>
+    </a>
+  </div>
+</article>

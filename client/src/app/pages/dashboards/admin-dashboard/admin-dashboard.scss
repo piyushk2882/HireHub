@@ -1,0 +1,11 @@
+@use '../seeker-dashboard/seeker-dashboard.scss';
+
+.admin-avatar {
+  background: linear-gradient(135deg, #db2777, #be185d) !important;
+  box-shadow: 0 8px 16px rgba(219, 39, 119, 0.25) !important;
+}
+
+.admin-text {
+  color: #db2777 !important;
+}
+

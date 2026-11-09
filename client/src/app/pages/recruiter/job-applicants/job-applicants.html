@@ -1,0 +1,497 @@
+<app-navbar></app-navbar>
+
+<div class="job-applicants-page">
+  <div class="page-container">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-bar">
+      <a routerLink="/recruiter/dashboard" class="btn-back">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Back to Recruiter Dashboard
+      </a>
+    </div>
+
+    <!-- Feedback Toast -->
+    @if (feedbackMessage()) {
+      <div class="feedback-toast" [class]="feedbackMessage()!.type" role="alert">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          @if (feedbackMessage()!.type === 'success') {
+            <polyline points="20 6 9 17 4 12"></polyline>
+          } @else {
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          }
+        </svg>
+        <span>{{ feedbackMessage()!.text }}</span>
+      </div>
+    }
+
+    <!-- Job Header Info -->
+    <header class="applicants-header">
+      <div class="header-main">
+        <div class="header-badge">Applicant Tracking System</div>
+        <h1 class="header-title">{{ job()?.title || 'Job Applicants' }}</h1>
+        <p class="header-subtitle">
+          Manage candidate submissions, review resumes, and advance candidates through your hiring pipeline.
+        </p>
+      </div>
+
+      @if (job()) {
+        <div class="header-right">
+          <span class="job-status-pill" [class]="job()!.status.toLowerCase()">
+            Job Status: {{ job()!.status }}
+          </span>
+          <a [routerLink]="['/jobs', job()!._id]" class="btn-public-job" title="View Public Job Posting">
+            Public View
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+          </a>
+        </div>
+      }
+    </header>
+
+    <!-- Toolbar: Status Filter Pills & Sort Select -->
+    <div class="toolbar-card">
+      <div class="status-filters">
+        @for (st of statuses; track st) {
+          <button
+            type="button"
+            class="filter-pill"
+            [class.active]="selectedStatus() === st"
+            (click)="filterByStatus(st)"
+          >
+            {{ st }}
+          </button>
+        }
+      </div>
+
+      <div class="toolbar-actions">
+        <label for="sortApplicants" class="sort-label">Sort:</label>
+        <select
+          id="sortApplicants"
+          class="sort-select"
+          [value]="selectedSort()"
+          (change)="changeSort($any($event.target).value)"
+        >
+          <option value="newest">Newest Applications</option>
+          <option value="oldest">Oldest Applications</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- LOADING SKELETONS -->
+    @if (isLoading()) {
+      <div class="loading-container">
+        @for (item of [1, 2, 3]; track item) {
+          <div class="skeleton-row"></div>
+        }
+      </div>
+    }
+
+    <!-- ERROR STATE -->
+    @else if (errorMessage()) {
+      <div class="state-card error-card">
+        <div class="state-icon error-icon">
+          <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        </div>
+        <h3>Unable to Load Applicants</h3>
+        <p>{{ errorMessage() }}</p>
+        <button type="button" class="btn-primary-action" (click)="loadApplicants()">Try Again</button>
+      </div>
+    }
+
+    <!-- EMPTY STATE -->
+    @else if (applicants().length === 0) {
+      <div class="state-card empty-card">
+        <div class="state-icon empty-icon">
+          <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </div>
+        <h3>No Applicants Found</h3>
+        <p>
+          @if (selectedStatus() !== 'All') {
+            No candidates are currently in '{{ selectedStatus() }}' status for this posting.
+          } @else {
+            No candidates have submitted an application for this job posting yet.
+          }
+        </p>
+      </div>
+    }
+
+    <!-- APPLICANTS TABLE -->
+    @else {
+      <div class="table-container">
+        <table class="applicants-table">
+          <thead>
+            <tr>
+              <th>Candidate</th>
+              <th>Contact Info</th>
+              <th>Applied Date</th>
+              <th>Resume</th>
+              <th>Status</th>
+              <th>Status Actions</th>
+              <th class="th-actions">Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (app of applicants(); track app._id) {
+              <tr class="applicant-row">
+                <!-- Candidate Name & Avatar -->
+                <td class="col-candidate">
+                  <div class="candidate-profile-cell">
+                    <div class="candidate-avatar">
+                      {{ getCandidateName(app).charAt(0).toUpperCase() }}
+                    </div>
+                    <div class="candidate-meta">
+                      <strong class="candidate-name">{{ getCandidateName(app) }}</strong>
+                      @if (app.coverLetter) {
+                        <span class="has-cover-note" title="Candidate provided a cover letter">Has Cover Letter</span>
+                      }
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Contact Info -->
+                <td class="col-contact">
+                  <div class="contact-details">
+                    <span class="contact-email">{{ getCandidateEmail(app) }}</span>
+                    @if (getCandidatePhone(app)) {
+                      <span class="contact-phone">{{ getCandidatePhone(app) }}</span>
+                    }
+                  </div>
+                </td>
+
+                <!-- Applied Date -->
+                <td class="col-date">
+                  {{ app.appliedAt | date:'mediumDate' }}
+                </td>
+
+                <!-- Resume Download -->
+                <td class="col-resume">
+                  <button
+                    type="button"
+                    class="btn-table-resume"
+                    (click)="downloadResume(app)"
+                    title="Download candidate resume"
+                  >
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                      <polyline points="7 10 12 15 17 10"></polyline>
+                      <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    <span>Download</span>
+                  </button>
+                </td>
+
+                <!-- Current Status -->
+                <td class="col-status">
+                  <span
+                    class="status-badge"
+                    [style.background-color]="getStatusBadge(app.status).bg"
+                    [style.color]="getStatusBadge(app.status).color"
+                  >
+                    ● {{ getStatusBadge(app.status).label }}
+                  </span>
+                </td>
+
+                <!-- Transition Actions -->
+                <td class="col-transitions">
+                  <div class="transition-buttons">
+                    @for (nextSt of getAllowedTransitions(app.status); track nextSt) {
+                      <button
+                        type="button"
+                        class="btn-transition"
+                        [class.btn-review]="nextSt === 'Reviewed'"
+                        [class.btn-shortlist]="nextSt === 'Shortlisted'"
+                        [class.btn-accept]="nextSt === 'Accepted'"
+                        [class.btn-reject]="nextSt === 'Rejected'"
+                        (click)="promptStatusChange(app, nextSt)"
+                      >
+                        {{ nextSt }}
+                      </button>
+                    }
+                    @if (getAllowedTransitions(app.status).length === 0) {
+                      <span class="terminal-text">Terminal State</span>
+                    }
+                  </div>
+                </td>
+
+                <!-- View Full Details -->
+                <td class="col-actions">
+                  <button
+                    type="button"
+                    class="btn-view-details"
+                    (click)="openDetails(app)"
+                    title="View candidate details & history"
+                  >
+                    View
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- PAGINATION -->
+      @if (pagination() && pagination()!.totalPages > 1) {
+        <div class="pagination-container">
+          <span class="pag-text">
+            Page <strong>{{ pagination()!.page }}</strong> of <strong>{{ pagination()!.totalPages }}</strong>
+            ({{ pagination()!.total }} total candidates)
+          </span>
+
+          <div class="pag-buttons">
+            <button
+              type="button"
+              class="btn-pag"
+              [disabled]="!pagination()!.hasPrevPage"
+              (click)="goToPage(pagination()!.page - 1)"
+            >
+              Previous
+            </button>
+            <button
+              type="button"
+              class="btn-pag"
+              [disabled]="!pagination()!.hasNextPage"
+              (click)="goToPage(pagination()!.page + 1)"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>
+
+<!-- APPLICATION DETAILS MODAL -->
+@if (selectedApplication()) {
+  <div class="modal-backdrop" (click)="closeDetails()" role="dialog" aria-modal="true" aria-labelledby="recruiterDetailsTitle">
+    <div class="modal-dialog details-dialog" (click)="$event.stopPropagation()">
+      <div class="dialog-header">
+        <div class="header-profile">
+          <div class="avatar-large">
+            {{ getCandidateName(selectedApplication()!).charAt(0).toUpperCase() }}
+          </div>
+          <div>
+            <h2 id="recruiterDetailsTitle" class="candidate-title">{{ getCandidateName(selectedApplication()!) }}</h2>
+            <p class="candidate-contact-sub">
+              {{ getCandidateEmail(selectedApplication()!) }}
+              @if (getCandidatePhone(selectedApplication()!)) {
+                • {{ getCandidatePhone(selectedApplication()!) }}
+              }
+            </p>
+          </div>
+        </div>
+
+        <button type="button" class="btn-close-modal" (click)="closeDetails()" aria-label="Close dialog">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="dialog-body">
+        <!-- Status & Quick Actions Bar -->
+        <div class="details-section status-section">
+          <div class="status-summary-row">
+            <div>
+              <span class="section-label">Current Pipeline Status</span>
+              <div class="status-badge-wrap">
+                <span
+                  class="status-badge large"
+                  [style.background-color]="getStatusBadge(selectedApplication()!.status).bg"
+                  [style.color]="getStatusBadge(selectedApplication()!.status).color"
+                >
+                  ● {{ getStatusBadge(selectedApplication()!.status).label }}
+                </span>
+                <span class="applied-date-note">Applied on {{ selectedApplication()!.appliedAt | date:'medium' }}</span>
+              </div>
+            </div>
+
+            <!-- Lifecycle Quick Actions -->
+            <div class="quick-actions-wrap">
+              @for (nextSt of getAllowedTransitions(selectedApplication()!.status); track nextSt) {
+                <button
+                  type="button"
+                  class="btn-transition"
+                  [class.btn-review]="nextSt === 'Reviewed'"
+                  [class.btn-shortlist]="nextSt === 'Shortlisted'"
+                  [class.btn-accept]="nextSt === 'Accepted'"
+                  [class.btn-reject]="nextSt === 'Rejected'"
+                  (click)="promptStatusChange(selectedApplication()!, nextSt)"
+                >
+                  Move to {{ nextSt }}
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Resume Download Section -->
+        <div class="details-section">
+          <span class="section-label">Candidate Resume</span>
+          <div class="resume-meta-box">
+            <div class="file-info-group">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+              <div>
+                <strong>{{ selectedApplication()!.resumeOriginalName || 'Resume.pdf' }}</strong>
+                <span class="mime-text">{{ selectedApplication()!.resumeMimeType || 'Document' }}</span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              class="btn-primary-action"
+              (click)="downloadResume(selectedApplication()!)"
+              [disabled]="isDownloadingResume()"
+            >
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>Download Candidate Resume</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Cover Letter (If provided) -->
+        @if (selectedApplication()!.coverLetter) {
+          <div class="details-section">
+            <span class="section-label">Cover Letter</span>
+            <div class="cover-letter-box">
+              <p>{{ selectedApplication()!.coverLetter }}</p>
+            </div>
+          </div>
+        }
+
+        <!-- Status History & Audit Trail -->
+        <div class="details-section">
+          <span class="section-label">Application Status History</span>
+
+          @if (selectedApplication()!.statusHistory && selectedApplication()!.statusHistory!.length > 0) {
+            <div class="history-timeline">
+              @for (hist of selectedApplication()!.statusHistory; track hist.changedAt) {
+                <div class="history-item">
+                  <div class="history-dot" [style.background-color]="getStatusBadge(hist.status).color"></div>
+                  <div class="history-details">
+                    <div class="history-header">
+                      <strong [style.color]="getStatusBadge(hist.status).color">{{ hist.status }}</strong>
+                      <span class="history-time">{{ hist.changedAt | date:'medium' }}</span>
+                    </div>
+                    @if (hist.note) {
+                      <p class="history-note">"{{ hist.note }}"</p>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="no-history-sub">No previous status transitions recorded.</p>
+          }
+        </div>
+      </div>
+
+      <div class="dialog-footer">
+        <button type="button" class="btn-dialog-close" (click)="closeDetails()">Close</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- STATUS TRANSITION CONFIRMATION DIALOG -->
+@if (statusChangeModal()) {
+  <div class="modal-backdrop status-confirm-backdrop" (click)="closeStatusModal()" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <div class="modal-dialog confirm-dialog" (click)="$event.stopPropagation()">
+      <div class="confirm-icon-box" [class]="'icon-' + statusChangeModal()!.targetStatus.toLowerCase()">
+        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+        </svg>
+      </div>
+
+      <h3 id="confirmTitle" class="confirm-title">
+        Update Status to '{{ statusChangeModal()!.targetStatus }}'
+      </h3>
+      <p class="confirm-subtitle">
+        You are changing <strong>{{ getCandidateName(statusChangeModal()!.app) }}</strong>'s application status from
+        <span class="prev-st">{{ statusChangeModal()!.app.status }}</span> to
+        <span class="next-st">{{ statusChangeModal()!.targetStatus }}</span>.
+      </p>
+
+      @if (statusUpdateError()) {
+        <div class="confirm-error-alert" role="alert">
+          {{ statusUpdateError() }}
+        </div>
+      }
+
+      <div class="form-group note-group">
+        <div class="label-row">
+          <label class="form-label" for="statusNoteTextarea">Recruiter Note (Optional)</label>
+          <span class="counter-text">{{ statusNote().length }} / 500</span>
+        </div>
+        <textarea
+          id="statusNoteTextarea"
+          class="note-textarea"
+          rows="3"
+          maxlength="500"
+          [(ngModel)]="statusNote"
+          placeholder="Add an internal note or rationale for this status update..."
+          [disabled]="isUpdatingStatus()"
+        ></textarea>
+      </div>
+
+      <div class="confirm-actions">
+        <button
+          type="button"
+          class="btn-secondary-action"
+          (click)="closeStatusModal()"
+          [disabled]="isUpdatingStatus()"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          class="btn-confirm-status"
+          [class.btn-review]="statusChangeModal()!.targetStatus === 'Reviewed'"
+          [class.btn-shortlist]="statusChangeModal()!.targetStatus === 'Shortlisted'"
+          [class.btn-accept]="statusChangeModal()!.targetStatus === 'Accepted'"
+          [class.btn-reject]="statusChangeModal()!.targetStatus === 'Rejected'"
+          (click)="confirmStatusChange()"
+          [disabled]="isUpdatingStatus()"
+        >
+          @if (isUpdatingStatus()) {
+            <span class="spinner-sm"></span>
+            <span>Updating...</span>
+          } @else {
+            <span>Confirm Status Change</span>
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<app-footer></app-footer>
+

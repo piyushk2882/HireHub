@@ -1,0 +1,163 @@
+<div class="settings-page">
+  <div class="settings-container">
+    <!-- Breadcrumb / Header -->
+    <header class="settings-header">
+      <div class="header-nav">
+        <a routerLink="/notifications" class="back-link">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          Back to Notifications
+        </a>
+      </div>
+      <h1 class="page-title">Notification Settings</h1>
+      <p class="page-subtitle">Manage how and when HireHub sends you email alerts and updates.</p>
+    </header>
+
+    <!-- Info banner: In-app notifications are always on -->
+    <div class="info-banner" role="status">
+      <div class="info-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="16" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+      </div>
+      <div class="info-content">
+        <h2 class="info-title">In-App Notifications Are Always Active</h2>
+        <p class="info-desc">
+          You will always receive real-time notifications in your HireHub bell dropdown and notification centre. The settings below control email notifications delivered to your inbox.
+        </p>
+      </div>
+    </div>
+
+    <!-- Feedback messages -->
+    @if (successMessage()) {
+      <div class="feedback-alert success-alert" role="alert">
+        <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+        <span>{{ successMessage() }}</span>
+      </div>
+    }
+
+    @if (errorMessage()) {
+      <div class="feedback-alert error-alert" role="alert">
+        <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span>{{ errorMessage() }}</span>
+      </div>
+    }
+
+    <!-- Loading State -->
+    @if (loading()) {
+      <div class="loading-container">
+        <div class="spinner"></div>
+        <p>Loading your notification preferences...</p>
+      </div>
+    } @else {
+      <!-- Main Settings Card -->
+      <div class="settings-card">
+        <!-- Master Toggle -->
+        <div class="preference-section master-section">
+          <div class="preference-info">
+            <h2 class="pref-label">Email Notifications</h2>
+            <p class="pref-description">
+              Enable or disable all outbound email notifications from HireHub.
+            </p>
+          </div>
+          <div class="toggle-control">
+            <label class="switch" [class.disabled]="isSaving()">
+              <input
+                type="checkbox"
+                [checked]="preferences().emailNotificationsEnabled"
+                (change)="togglePreference('emailNotificationsEnabled')"
+                [disabled]="isSaving()"
+                aria-label="Toggle all email notifications"
+              />
+              <span class="slider round"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <!-- Subordinate Toggles -->
+        <div class="sub-preferences" [class.dimmed]="!preferences().emailNotificationsEnabled">
+          @if (!preferences().emailNotificationsEnabled) {
+            <div class="disabled-hint">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+              </svg>
+              <span>Sub-preferences are paused because master email notifications are turned off.</span>
+            </div>
+          }
+
+          <!-- Application Status Emails -->
+          <div class="preference-section">
+            <div class="preference-info">
+              <h2 class="pref-label">Application Status Updates</h2>
+              <p class="pref-description">
+                Receive an email whenever an employer reviews, shortlists, accepts, or updates the status of your application.
+              </p>
+            </div>
+            <div class="toggle-control">
+              <label
+                class="switch"
+                [class.disabled]="!preferences().emailNotificationsEnabled || isSaving()"
+              >
+                <input
+                  type="checkbox"
+                  [checked]="preferences().applicationStatusEmails"
+                  (change)="togglePreference('applicationStatusEmails')"
+                  [disabled]="!preferences().emailNotificationsEnabled || isSaving()"
+                  aria-label="Toggle application status emails"
+                />
+                <span class="slider round"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Recruiter New Application Emails -->
+          @if (authService.currentUser()?.role === 'recruiter' || authService.currentUser()?.role === 'admin') {
+            <div class="preference-section">
+              <div class="preference-info">
+                <h2 class="pref-label">New Candidate Submissions</h2>
+                <p class="pref-description">
+                  Receive an immediate email alert when a candidate submits a new application to any of your posted jobs.
+                </p>
+              </div>
+              <div class="toggle-control">
+                <label
+                  class="switch"
+                  [class.disabled]="!preferences().emailNotificationsEnabled || isSaving()"
+                >
+                  <input
+                    type="checkbox"
+                    [checked]="preferences().recruiterNewApplicationEmails"
+                    (change)="togglePreference('recruiterNewApplicationEmails')"
+                    [disabled]="!preferences().emailNotificationsEnabled || isSaving()"
+                    aria-label="Toggle recruiter new application emails"
+                  />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+            </div>
+          }
+        </div>
+
+        @if (isSaving()) {
+          <div class="saving-indicator">
+            <div class="spinner-small"></div>
+            <span>Saving changes...</span>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

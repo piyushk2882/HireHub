@@ -1,0 +1,193 @@
+<app-navbar></app-navbar>
+
+<main class="placeholder-main">
+  <div class="placeholder-container">
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a routerLink="/">Home</a>
+      <span class="sep">/</span>
+      <span class="current">{{ pageTitle() }}</span>
+    </nav>
+
+    <!-- Content for Job Details -->
+    @if (pageType() === 'job' && jobDetails(); as job) {
+      <div class="card job-detail-card">
+        <div class="job-detail-header">
+          <div
+            class="job-detail-logo"
+            [style.background-color]="job.logoBg"
+            [style.color]="job.logoColor"
+          >
+            {{ job.logoText }}
+          </div>
+
+          <div class="job-detail-title-group">
+            <div class="title-row">
+              <h1>{{ job.title }}</h1>
+              @if (job.featured) {
+                <span class="badge badge-featured">Featured Opening</span>
+              }
+            </div>
+            <p class="company-sub">{{ job.company }} • 📍 {{ job.location }} • ◷ {{ job.type }}</p>
+          </div>
+        </div>
+
+        <div class="job-detail-body">
+          <div class="info-pill-grid">
+            <div class="info-pill">
+              <span class="pill-label">Category</span>
+              <strong>{{ job.category }}</strong>
+            </div>
+            <div class="info-pill">
+              <span class="pill-label">Offered Salary</span>
+              <strong class="salary-highlight">{{ job.salary }}</strong>
+            </div>
+            <div class="info-pill">
+              <span class="pill-label">Employment Type</span>
+              <strong>{{ job.type }}</strong>
+            </div>
+            <div class="info-pill">
+              <span class="pill-label">Work Location</span>
+              <strong>{{ job.location }}</strong>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h3>Role Description</h3>
+            <p>{{ job.description }}</p>
+          </div>
+
+          <div class="detail-section">
+            <h3>Required Skills & Technologies</h3>
+            <div class="skills-wrap">
+              @for (skill of job.skills; track skill) {
+                <span class="skill-chip">{{ skill }}</span>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="job-detail-footer">
+          <a routerLink="/" class="btn-secondary">← Back to All Jobs</a>
+          <button type="button" class="btn-primary" (click)="pageTitle.set('Application Submitted (Demo Mode)!')">
+            Apply for this Position →
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Content for Login -->
+    @else if (pageType() === 'login') {
+      <div class="card auth-card">
+        <div class="auth-header">
+          <h2>Welcome Back</h2>
+          <p>Sign in to your HireHub account to manage job applications and alerts.</p>
+        </div>
+
+        <form class="auth-form" (submit)="$event.preventDefault()">
+          <div class="form-group">
+            <label for="login-email">Email Address</label>
+            <input id="login-email" type="email" placeholder="you@company.com" />
+          </div>
+
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <input id="login-password" type="password" placeholder="••••••••" />
+          </div>
+
+          <button type="submit" class="btn-primary btn-block">Sign In</button>
+        </form>
+
+        <div class="auth-footer">
+          <p>Don't have an account? <a routerLink="/auth/register">Get Started</a></p>
+          <a routerLink="/" class="back-link">← Return to Home</a>
+        </div>
+      </div>
+    }
+
+    <!-- Content for Register -->
+    @else if (pageType() === 'register') {
+      <div class="card auth-card">
+        <div class="auth-header">
+          <h2>Create Your Account</h2>
+          <p>Join thousands of professionals and top companies hiring on HireHub.</p>
+        </div>
+
+        <form class="auth-form" (submit)="$event.preventDefault()">
+          <div class="form-group">
+            <label for="reg-name">Full Name</label>
+            <input id="reg-name" type="text" placeholder="John Doe" />
+          </div>
+
+          <div class="form-group">
+            <label for="reg-email">Work Email</label>
+            <input id="reg-email" type="email" placeholder="you@company.com" />
+          </div>
+
+          <div class="form-group">
+            <label for="reg-password">Password</label>
+            <input id="reg-password" type="password" placeholder="Create a strong password" />
+          </div>
+
+          <button type="submit" class="btn-primary btn-block">Create Account</button>
+        </form>
+
+        <div class="auth-footer">
+          <p>Already have an account? <a routerLink="/auth/login">Sign In</a></p>
+          <a routerLink="/" class="back-link">← Return to Home</a>
+        </div>
+      </div>
+    }
+
+    <!-- Content for Recruiter / Post Job -->
+    @else if (pageType() === 'recruiter') {
+      <div class="card recruiter-card">
+        <div class="auth-header">
+          <h2>Post a Job on HireHub</h2>
+          <p>Reach over 10,000+ verified professionals and fill your opening fast.</p>
+        </div>
+
+        <form class="auth-form" (submit)="$event.preventDefault()">
+          <div class="form-group">
+            <label for="job-title-input">Job Title</label>
+            <input id="job-title-input" type="text" placeholder="e.g. Senior Angular Developer" />
+          </div>
+
+          <div class="form-group">
+            <label for="job-company-input">Company Name</label>
+            <input id="job-company-input" type="text" placeholder="e.g. Acme Tech Solutions" />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="job-location-input">Location</label>
+              <input id="job-location-input" type="text" placeholder="e.g. Bangalore, Remote" />
+            </div>
+            <div class="form-group">
+              <label for="job-salary-input">Salary Range</label>
+              <input id="job-salary-input" type="text" placeholder="e.g. ₹8–12 LPA" />
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary btn-block">Publish Job Listing</button>
+        </form>
+
+        <div class="auth-footer">
+          <a routerLink="/" class="back-link">← Return to Home</a>
+        </div>
+      </div>
+    }
+
+    <!-- General Placeholder -->
+    @else {
+      <div class="card general-card">
+        <h2>{{ pageTitle() }}</h2>
+        <p>This module is currently part of the upcoming roadmap and will be fully wired with the Node.js & MongoDB backend.</p>
+        <a routerLink="/" class="btn-primary">Return to Home Page</a>
+      </div>
+    }
+  </div>
+</main>
+
+<app-footer></app-footer>
+

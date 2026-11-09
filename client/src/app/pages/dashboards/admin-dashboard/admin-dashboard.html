@@ -1,0 +1,140 @@
+<app-navbar></app-navbar>
+
+<div class="dashboard-page">
+  <div class="dashboard-container">
+    <!-- Header Banner -->
+    <header class="dashboard-header">
+      <div class="header-content">
+        <div class="user-greeting">
+          <div class="user-avatar admin-avatar">
+            {{ authService.currentUser()?.name?.charAt(0)?.toUpperCase() || 'A' }}
+          </div>
+          <div>
+            <div class="badge-row">
+              <span class="role-badge admin-badge">Platform Administrator</span>
+              <span class="status-badge active-badge">● System Root</span>
+            </div>
+            <h1 class="welcome-title">{{ authService.currentUser()?.name }}</h1>
+            <p class="welcome-subtitle">{{ authService.currentUser()?.email }} • System-wide control panel & auditing</p>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <button (click)="logout()" class="btn-outline">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            Log Out
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Quick Stats -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon-wrapper blue">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">System</span>
+          <span class="stat-label">User Management</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon-wrapper green">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">Active</span>
+          <span class="stat-label">System Health</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon-wrapper purple">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">Atlas OK</span>
+          <span class="stat-label">Database Status</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon-wrapper amber">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">JWT+HTTP</span>
+          <span class="stat-label">Auth Guard Active</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Content Sections -->
+    <div class="dashboard-content-grid">
+      <!-- Admin Controls -->
+      <section class="card content-card">
+        <div class="card-header">
+          <h2 class="card-title">System Administration</h2>
+          <span class="phase-tag">Role: Administrator</span>
+        </div>
+        <div class="empty-state">
+          <div class="empty-icon">🛡️</div>
+          <h3>System Administrator Privilege Verified</h3>
+          <p>You have accessed the admin control panel guarded by <code>authGuard</code> and <code>roleGuard(['admin'])</code>. System-wide user moderation and company verifications are enabled.</p>
+        </div>
+      </section>
+
+      <!-- Admin Details -->
+      <section class="card side-card">
+        <div class="card-header">
+          <h2 class="card-title">Admin Profile</h2>
+        </div>
+        <div class="account-details-list">
+          <div class="detail-item">
+            <span class="detail-label">Admin Name</span>
+            <span class="detail-val">{{ authService.currentUser()?.name }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Admin Email</span>
+            <span class="detail-val">{{ authService.currentUser()?.email }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Role</span>
+            <span class="detail-val admin-text">Administrator</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Security Clearance</span>
+            <span class="status-pill active">Root Privileges</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Account Created</span>
+            <span class="detail-val">{{ authService.currentUser()?.createdAt | date:'mediumDate' }}</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<app-footer></app-footer>
+

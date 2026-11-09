@@ -1,0 +1,83 @@
+:root {
+  --primary: #345cf0;
+  --primary-hover: #264ad4;
+  --primary-light: #eef3ff;
+  --dark-navy: #17233c;
+  --secondary-dark: #172c55;
+  --bg-light-blue: #f4f7ff;
+  --bg-light-grey: #f8f9fc;
+  --white: #ffffff;
+  --text-primary: #17233c;
+  --text-secondary: #78849a;
+  --text-muted: #9aa5b8;
+  --border: #e9edf4;
+  --border-light: #f1f4f9;
+  --success: #16a36a;
+  --success-light: #e8f7f0;
+  --card-shadow: 0 4px 20px rgba(23, 35, 60, 0.05);
+  --card-shadow-hover: 0 12px 32px rgba(23, 35, 60, 0.1);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--white);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  position: relative;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+input {
+  font-family: inherit;
+}
+
+/* Common Layout and Utility Helpers */
+.container {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 16px;
+  }
+}

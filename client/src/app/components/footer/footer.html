@@ -1,0 +1,64 @@
+<footer class="site-footer">
+  <div class="footer-container">
+    <div class="footer-top">
+      <!-- Brand & Tagline -->
+      <div class="footer-brand-col">
+        <a routerLink="/" class="footer-brand" aria-label="HireHub Home">
+          <div class="footer-logo-icon">
+            <span>H</span>
+          </div>
+          <span class="footer-brand-title">HireHub</span>
+        </a>
+        <p class="footer-tagline">Connecting talent with opportunity.</p>
+        
+        <!-- Live Backend Status Indicator -->
+        <div class="api-status-badge" [class.is-online]="apiStatus() === 'online'" [class.is-offline]="apiStatus() === 'offline'">
+          <span class="status-dot"></span>
+          <span class="status-text">{{ apiMessage() }}</span>
+        </div>
+      </div>
+
+      <!-- Quick / Useful Links -->
+      <div class="footer-links-col">
+        <h4 class="footer-heading">Useful Links</h4>
+        <ul class="footer-links-list">
+          <li><a routerLink="/" fragment="categories">About Us</a></li>
+          <li><a href="#jobs">Find Jobs</a></li>
+          <li><a href="#companies">Companies</a></li>
+          <li><a routerLink="/auth/register">Contact</a></li>
+        </ul>
+      </div>
+
+      <!-- Quick Categories -->
+      <div class="footer-links-col">
+        <h4 class="footer-heading">Top Categories</h4>
+        <ul class="footer-links-list">
+          <li><a href="#jobs">Development</a></li>
+          <li><a href="#jobs">Design</a></li>
+          <li><a href="#jobs">Data Science</a></li>
+          <li><a href="#jobs">Marketing</a></li>
+        </ul>
+      </div>
+
+      <!-- For Employers -->
+      <div class="footer-links-col">
+        <h4 class="footer-heading">For Employers</h4>
+        <ul class="footer-links-list">
+          <li><a routerLink="/recruiter/post-job">Post a Job</a></li>
+          <li><a routerLink="/auth/register">Talent Solutions</a></li>
+          <li><a routerLink="/auth/login">Employer Login</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p class="copyright-text">© 2026 HireHub. All rights reserved.</p>
+      <div class="footer-sub-links">
+        <span class="sub-link">Privacy Policy</span>
+        <span class="sub-link">Terms of Service</span>
+        <span class="sub-link">Security</span>
+      </div>
+    </div>
+  </div>
+</footer>
+

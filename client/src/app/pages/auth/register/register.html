@@ -1,0 +1,173 @@
+<app-navbar></app-navbar>
+
+<main class="auth-page">
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-header">
+        <span class="auth-eyebrow">GET STARTED WITH HIREHUB</span>
+        <h1 class="auth-title">Create your account</h1>
+        <p class="auth-subtitle">Join thousands of job seekers and verified recruiters today.</p>
+      </div>
+
+      @if (errorMessage()) {
+        <div class="alert alert-error" role="alert" aria-live="polite">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <span>{{ errorMessage() }}</span>
+        </div>
+      }
+
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="auth-form" novalidate>
+        <!-- Account Type Selector -->
+        <div class="form-group">
+          <label>I want to:</label>
+          <div class="role-selector" role="radiogroup" aria-label="Account Type">
+            <label class="role-option" [class.is-selected]="registerForm.get('role')?.value === 'job_seeker'">
+              <input type="radio" formControlName="role" value="job_seeker" />
+              <div class="role-option-content">
+                <span class="role-icon">💼</span>
+                <strong>Find a Job</strong>
+                <small>Job Seeker</small>
+              </div>
+            </label>
+
+            <label class="role-option" [class.is-selected]="registerForm.get('role')?.value === 'recruiter'">
+              <input type="radio" formControlName="role" value="recruiter" />
+              <div class="role-option-content">
+                <span class="role-icon">🏢</span>
+                <strong>Hire Talent</strong>
+                <small>Recruiter / Employer</small>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Full Name Field -->
+        <div class="form-group">
+          <label for="reg-name">Full Name</label>
+          <div class="input-wrapper">
+            <svg class="field-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <input
+              id="reg-name"
+              type="text"
+              formControlName="name"
+              placeholder="e.g. John Doe"
+              [class.input-error]="registerForm.get('name')?.invalid && registerForm.get('name')?.touched"
+              autocomplete="name"
+            />
+          </div>
+          @if (registerForm.get('name')?.invalid && registerForm.get('name')?.touched) {
+            <span class="field-error">Please enter your full name (minimum 2 characters).</span>
+          }
+        </div>
+
+        <!-- Email Field -->
+        <div class="form-group">
+          <label for="reg-email">Work or Personal Email</label>
+          <div class="input-wrapper">
+            <svg class="field-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+            <input
+              id="reg-email"
+              type="email"
+              formControlName="email"
+              placeholder="you@company.com"
+              [class.input-error]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
+              autocomplete="email"
+            />
+          </div>
+          @if (registerForm.get('email')?.invalid && registerForm.get('email')?.touched) {
+            <span class="field-error">Please enter a valid email address.</span>
+          }
+        </div>
+
+        <!-- Password Field -->
+        <div class="form-group">
+          <label for="reg-password">Password (Minimum 8 characters)</label>
+          <div class="input-wrapper">
+            <svg class="field-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <input
+              id="reg-password"
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="Create a strong password"
+              [class.input-error]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched"
+              autocomplete="new-password"
+            />
+            <button
+              type="button"
+              class="password-toggle-btn"
+              (click)="togglePasswordVisibility()"
+              [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+            >
+              @if (showPassword()) {
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                  <line x1="1" y1="1" x2="23" y2="23"></line>
+                </svg>
+              } @else {
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              }
+            </button>
+          </div>
+          @if (registerForm.get('password')?.invalid && registerForm.get('password')?.touched) {
+            <span class="field-error">Password must be at least 8 characters long.</span>
+          }
+        </div>
+
+        <!-- Confirm Password Field -->
+        <div class="form-group">
+          <label for="reg-confirm-password">Confirm Password</label>
+          <div class="input-wrapper">
+            <svg class="field-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <input
+              id="reg-confirm-password"
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="confirmPassword"
+              placeholder="Re-enter your password"
+              [class.input-error]="registerForm.get('confirmPassword')?.invalid && registerForm.get('confirmPassword')?.touched"
+              autocomplete="new-password"
+            />
+          </div>
+          @if (registerForm.get('confirmPassword')?.hasError('passwordMismatch') && registerForm.get('confirmPassword')?.touched) {
+            <span class="field-error">Passwords do not match.</span>
+          }
+        </div>
+
+        <button type="submit" class="btn-submit" [disabled]="isLoading()">
+          @if (isLoading()) {
+            <span class="spinner" aria-hidden="true"></span>
+            <span>Creating account...</span>
+          } @else {
+            <span>Create Account</span>
+          }
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        <p>Already have an account? <a routerLink="/auth/login">Log In</a></p>
+        <a routerLink="/" class="back-link">← Return to Home</a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<app-footer></app-footer>
+

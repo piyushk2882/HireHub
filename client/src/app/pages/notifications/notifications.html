@@ -1,0 +1,226 @@
+<div class="notifications-page">
+  <div class="page-container">
+    <!-- Header Section -->
+    <div class="page-header">
+      <div class="header-left">
+        <h1 class="page-title">Notification Centre</h1>
+        <p class="page-subtitle">Stay informed about application updates, status changes, and candidate activity.</p>
+      </div>
+      <div class="header-right">
+        @if (notificationService.unreadCount() > 0) {
+          <button type="button" class="btn-mark-all" (click)="markAllAsRead()">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span>Mark all as read</span>
+          </button>
+        }
+        <a routerLink="/settings/notifications" class="btn-preferences">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>Preferences</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="tabs-container">
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="activeFilter() === 'all'"
+        (click)="setFilter('all')"
+      >
+        <span>All Notifications</span>
+        @if (notificationService.pagination()) {
+          <span class="tab-count">{{ notificationService.pagination()?.total }}</span>
+        }
+      </button>
+
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="activeFilter() === 'unread'"
+        (click)="setFilter('unread')"
+      >
+        <span>Unread</span>
+        @if (notificationService.unreadCount() > 0) {
+          <span class="tab-count unread-badge">{{ notificationService.unreadCount() }}</span>
+        }
+      </button>
+    </div>
+
+    <!-- Content Box -->
+    <div class="content-card">
+      <!-- Loading State -->
+      @if (notificationService.loading()) {
+        <div class="state-container loading-state">
+          <span class="page-spinner"></span>
+          <p class="state-title">Loading notifications...</p>
+        </div>
+      }
+
+      <!-- Error State -->
+      @else if (notificationService.error()) {
+        <div class="state-container error-state">
+          <div class="error-icon">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+          </div>
+          <p class="state-title">Unable to load notifications</p>
+          <p class="state-desc">{{ notificationService.error() }}</p>
+          <button type="button" class="btn-retry" (click)="loadPage(currentPage())">
+            Try Again
+          </button>
+        </div>
+      }
+
+      <!-- Empty State -->
+      @else if (notificationService.notifications().length === 0) {
+        <div class="state-container empty-state">
+          <div class="empty-icon-circle">
+            <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+          </div>
+          <p class="state-title">
+            {{ activeFilter() === 'unread' ? 'No unread notifications' : 'No notifications yet' }}
+          </p>
+          <p class="state-desc">
+            {{ activeFilter() === 'unread'
+              ? 'You are all caught up! Check back later for updates on your applications.'
+              : 'When you submit applications or updates occur, they will appear right here.' }}
+          </p>
+          @if (activeFilter() === 'unread') {
+            <button type="button" class="btn-view-all" (click)="setFilter('all')">
+              View All Notifications
+            </button>
+          }
+        </div>
+      }
+
+      <!-- Populated Notification List -->
+      @else {
+        <div class="notifications-list">
+          @for (item of notificationService.notifications(); track item._id) {
+            <div
+              class="notification-card"
+              [class.unread]="!item.isRead"
+              (click)="openNotification(item)"
+              role="button"
+              tabindex="0"
+            >
+              <!-- Icon Column -->
+              <div class="card-icon" [attr.data-type]="item.type">
+                @if (item.type === 'NEW_APPLICATION') {
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                  </svg>
+                } @else if (item.type === 'APPLICATION_ACCEPTED') {
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                  </svg>
+                } @else if (item.type === 'APPLICATION_SHORTLISTED') {
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                  </svg>
+                } @else if (item.type === 'APPLICATION_REJECTED') {
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                  </svg>
+                } @else {
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 14 14"></polyline>
+                  </svg>
+                }
+              </div>
+
+              <!-- Main Content -->
+              <div class="card-content">
+                <div class="card-title-row">
+                  <h3 class="card-title">{{ item.title }}</h3>
+                  @if (!item.isRead) {
+                    <span class="unread-pill">Unread</span>
+                  }
+                  <span class="card-time">{{ formatTime(item.createdAt) }}</span>
+                </div>
+                <p class="card-message">{{ item.message }}</p>
+                <div class="card-footer-info">
+                  <span class="action-hint">Click to view details &rarr;</span>
+                </div>
+              </div>
+
+              <!-- Action Controls -->
+              <div class="card-actions">
+                @if (!item.isRead) {
+                  <button
+                    type="button"
+                    class="action-btn mark-read"
+                    (click)="markAsRead(item, $event)"
+                    title="Mark as read"
+                    aria-label="Mark notification as read"
+                  >
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </button>
+                }
+                <button
+                  type="button"
+                  class="action-btn delete"
+                  (click)="deleteNotification(item, $event)"
+                  title="Delete notification"
+                  aria-label="Delete notification"
+                >
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Pagination Controls -->
+        @if (notificationService.pagination() && notificationService.pagination()!.totalPages > 1) {
+          <div class="pagination-bar">
+            <button
+              type="button"
+              class="page-btn prev-btn"
+              [disabled]="!notificationService.pagination()!.hasPrevPage"
+              (click)="loadPage(currentPage() - 1)"
+            >
+              &larr; Previous
+            </button>
+            <span class="page-info">
+              Page {{ notificationService.pagination()!.page }} of {{ notificationService.pagination()!.totalPages }}
+            </span>
+            <button
+              type="button"
+              class="page-btn next-btn"
+              [disabled]="!notificationService.pagination()!.hasNextPage"
+              (click)="loadPage(currentPage() + 1)"
+            >
+              Next &rarr;
+            </button>
+          </div>
+        }
+      }
+    </div>
+  </div>
+</div>
+

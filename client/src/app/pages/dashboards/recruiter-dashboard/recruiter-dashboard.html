@@ -1,0 +1,606 @@
+<app-navbar></app-navbar>
+
+<div class="dashboard-page">
+  <div class="dashboard-container">
+    <!-- Header Banner -->
+    <header class="dashboard-header">
+      <div class="header-content">
+        <div class="user-greeting">
+          <div class="user-avatar recruiter-avatar">
+            {{ authService.currentUser()?.name?.charAt(0)?.toUpperCase() || 'R' }}
+          </div>
+          <div>
+            <div class="badge-row">
+              <span class="role-badge recruiter-badge">Recruiter / Employer</span>
+              @if (company()) {
+                <span class="status-badge active-badge">● {{ company()!.companyName }}</span>
+              } @else {
+                <span class="status-badge warning-badge">▲ Profile Setup Needed</span>
+              }
+            </div>
+            <h1 class="welcome-title">{{ authService.currentUser()?.name }}</h1>
+            <p class="welcome-subtitle">{{ authService.currentUser()?.email }} • Manage job postings and company profile</p>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <button type="button" (click)="startCreateJob()" class="btn-primary">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Post a Job
+          </button>
+          <button type="button" (click)="logout()" class="btn-outline">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            Log Out
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Feedback Toast / Banner -->
+    @if (feedbackMessage()) {
+      <div class="alert-banner" [class.alert-success]="feedbackMessage()!.type === 'success'" [class.alert-error]="feedbackMessage()!.type === 'error'">
+        <span>{{ feedbackMessage()!.text }}</span>
+        <button type="button" class="btn-dismiss" (click)="feedbackMessage.set(null)">×</button>
+      </div>
+    }
+
+    <!-- Quick Stats -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon-wrapper blue">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ activeJobsCount() }}</span>
+          <span class="stat-label">Active Postings</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon-wrapper green">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ draftJobsCount() }}</span>
+          <span class="stat-label">Draft Postings</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon-wrapper purple">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ totalJobsCount() }}</span>
+          <span class="stat-label">Total Jobs Managed</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon-wrapper amber">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 21h18"></path>
+            <path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ company() ? 'Connected' : 'Pending' }}</span>
+          <span class="stat-label">Company Profile</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB NAVIGATION BAR -->
+    <nav class="recruiter-tabs-bar" role="tablist">
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="activeTab() === 'jobs'"
+        (click)="setTab('jobs')"
+        role="tab"
+        [attr.aria-selected]="activeTab() === 'jobs'"
+      >
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+        </svg>
+        My Job Postings ({{ totalJobsCount() }})
+      </button>
+
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="activeTab() === 'post-job'"
+        (click)="editingJobId() ? setTab('post-job') : startCreateJob()"
+        role="tab"
+        [attr.aria-selected]="activeTab() === 'post-job'"
+      >
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        {{ editingJobId() ? 'Edit Job Posting' : 'Post a New Job' }}
+      </button>
+
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="activeTab() === 'company'"
+        (click)="setTab('company')"
+        role="tab"
+        [attr.aria-selected]="activeTab() === 'company'"
+      >
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 21h18"></path>
+          <path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path>
+        </svg>
+        Company Profile
+      </button>
+    </nav>
+
+    <!-- ========================================================
+         TAB 1: MY JOB POSTINGS
+    ======================================================== -->
+    @if (activeTab() === 'jobs') {
+      <div class="card my-jobs-card">
+        <div class="jobs-toolbar">
+          <div class="status-pills-row">
+            @for (st of ['All', 'Active', 'Draft', 'Closed', 'Archived']; track st) {
+              <button
+                type="button"
+                class="status-filter-pill"
+                [class.selected]="selectedStatus() === st"
+                (click)="filterByStatus(st)"
+              >
+                {{ st }}
+              </button>
+            }
+          </div>
+
+          <button type="button" class="btn-refresh" (click)="loadMyJobs()" title="Refresh List">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <polyline points="1 20 1 14 7 14"></polyline>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            </svg>
+            Refresh
+          </button>
+        </div>
+
+        <!-- LOADING STATE -->
+        @if (isLoadingJobs()) {
+          <div class="loading-state-box">
+            <div class="spinner"></div>
+            <p>Loading your job listings...</p>
+          </div>
+        }
+
+        <!-- ERROR STATE -->
+        @else if (jobsErrorMessage()) {
+          <div class="error-state-box">
+            <p>{{ jobsErrorMessage() }}</p>
+            <button type="button" class="btn-primary" (click)="loadMyJobs()">Retry</button>
+          </div>
+        }
+
+        <!-- EMPTY STATE -->
+        @else if (myJobs().length === 0) {
+          <div class="empty-state">
+            <div class="empty-icon">💼</div>
+            <h3>No job postings found</h3>
+            <p>You haven't posted any jobs in this status yet. Create your first job posting to start attracting applicants.</p>
+            <button type="button" class="btn-primary" (click)="startCreateJob()">
+              Post a Job Now
+            </button>
+          </div>
+        }
+
+        <!-- JOBS TABLE -->
+        @else {
+          <div class="table-responsive">
+            <table class="jobs-table">
+              <thead>
+                <tr>
+                  <th>Job Title</th>
+                  <th>Location & Type</th>
+                  <th>Compensation</th>
+                  <th>Status</th>
+                  <th>Date Posted</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (job of myJobs(); track (job._id || job.id)) {
+                  <tr>
+                    <td class="col-title">
+                      <a [routerLink]="['/jobs', job._id || job.id]" class="job-title-link">
+                        {{ job.title }}
+                      </a>
+                      <span class="job-cat-subtitle">{{ job.category }}</span>
+                    </td>
+
+                    <td>
+                      <span class="info-tag loc-tag">{{ job.location }}</span>
+                      <span class="info-tag type-tag">{{ job.employmentType || job.type || 'Full Time' }}</span>
+                    </td>
+
+                    <td class="col-salary">
+                      {{ formatJobSalary(job) }}
+                    </td>
+
+                    <td>
+                      <div class="status-cell-wrapper">
+                        <span class="status-badge-cell" [class]="'badge-' + (job.status ? job.status.toLowerCase() : 'active')">
+                          {{ job.status || 'Active' }}
+                        </span>
+                        <select
+                          class="status-quick-select"
+                          [value]="job.status || 'Active'"
+                          (change)="changeStatus(job, $any($event.target).value)"
+                          aria-label="Change job status"
+                        >
+                          @for (st of statuses; track st) {
+                            <option [value]="st">{{ st }}</option>
+                          }
+                        </select>
+                      </div>
+                    </td>
+
+                    <td class="col-date">
+                      {{ job.createdAt | date:'mediumDate' }}
+                    </td>
+
+                    <td class="col-actions">
+                      <div class="action-buttons-group">
+                        <a [routerLink]="['/recruiter/jobs', job._id || job.id, 'applications']" class="btn-action applicants" title="View Job Applicants">
+                          Applicants
+                        </a>
+                        <a [routerLink]="['/jobs', job._id || job.id]" class="btn-action view" title="View Public Posting">
+                          View
+                        </a>
+                        <button type="button" class="btn-action edit" (click)="startEditJob(job)" title="Edit Posting">
+                          Edit
+                        </button>
+                        <button type="button" class="btn-action delete" (click)="deleteJob(job)" title="Delete or Archive">
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- PAGINATION -->
+          @if (pagination() && pagination()!.totalPages > 1) {
+            <div class="recruiter-pagination">
+              <span class="pag-info">
+                Page <strong>{{ pagination()!.page }}</strong> of <strong>{{ pagination()!.totalPages }}</strong>
+                ({{ pagination()!.total }} total)
+              </span>
+
+              <div class="pag-btn-group">
+                <button
+                  type="button"
+                  class="btn-pag"
+                  [disabled]="!pagination()!.hasPrevPage"
+                  (click)="goToPage(currentPage() - 1)"
+                >
+                  Previous
+                </button>
+                <button
+                  type="button"
+                  class="btn-pag"
+                  [disabled]="!pagination()!.hasNextPage"
+                  (click)="goToPage(currentPage() + 1)"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    }
+
+    <!-- ========================================================
+         TAB 2: POST / EDIT JOB FORM
+    ======================================================== -->
+    @if (activeTab() === 'post-job') {
+      <div class="card form-card">
+        <div class="form-card-header">
+          <div>
+            <h2 class="card-title">{{ editingJobId() ? 'Edit Job Posting' : 'Post a New Job Opportunity' }}</h2>
+            <p class="card-subtext">Fill in the details below to publish your position to live applicants on HireHub.</p>
+          </div>
+
+          @if (!company()) {
+            <div class="company-warning-box">
+              <span>⚠️ You need to set up a Company Profile first before publishing jobs.</span>
+              <button type="button" class="btn-outline-sm" (click)="setTab('company')">Go to Company Setup</button>
+            </div>
+          }
+        </div>
+
+        <form [formGroup]="jobForm" (ngSubmit)="submitJob()" class="job-reactive-form">
+          <div class="form-row two-col">
+            <div class="form-group">
+              <label for="job-title" class="form-label">Job Title *</label>
+              <input
+                id="job-title"
+                type="text"
+                class="form-input"
+                formControlName="title"
+                placeholder="e.g. Senior Frontend Engineer"
+              />
+              @if (jobForm.get('title')?.touched && jobForm.get('title')?.invalid) {
+                <span class="field-error">Job title is required (max 120 chars).</span>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="job-location" class="form-label">Location *</label>
+              <input
+                id="job-location"
+                type="text"
+                class="form-input"
+                formControlName="location"
+                placeholder="e.g. San Francisco, CA or Remote"
+              />
+              @if (jobForm.get('location')?.touched && jobForm.get('location')?.invalid) {
+                <span class="field-error">Job location is required.</span>
+              }
+            </div>
+          </div>
+
+          <div class="form-row three-col">
+            <div class="form-group">
+              <label for="job-category" class="form-label">Category *</label>
+              <select id="job-category" class="form-select" formControlName="category">
+                @for (cat of categories; track cat) {
+                  <option [value]="cat">{{ cat }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="job-type" class="form-label">Employment Type *</label>
+              <select id="job-type" class="form-select" formControlName="employmentType">
+                @for (t of employmentTypes; track t) {
+                  <option [value]="t">{{ t }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="job-exp" class="form-label">Experience Level *</label>
+              <select id="job-exp" class="form-select" formControlName="experienceLevel">
+                @for (lvl of experienceLevels; track lvl) {
+                  <option [value]="lvl">{{ lvl }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row two-col">
+            <div class="form-group">
+              <label for="job-min-sal" class="form-label">Minimum Salary ($/yr)</label>
+              <input
+                id="job-min-sal"
+                type="number"
+                class="form-input"
+                formControlName="salaryMin"
+                placeholder="e.g. 90000"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="job-max-sal" class="form-label">Maximum Salary ($/yr)</label>
+              <input
+                id="job-max-sal"
+                type="number"
+                class="form-input"
+                formControlName="salaryMax"
+                placeholder="e.g. 130000"
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="job-desc" class="form-label">Job Description *</label>
+            <textarea
+              id="job-desc"
+              rows="6"
+              class="form-textarea"
+              formControlName="description"
+              placeholder="Provide a comprehensive description of the position, team mission, and opportunity..."
+            ></textarea>
+            @if (jobForm.get('description')?.touched && jobForm.get('description')?.invalid) {
+              <span class="field-error">Job description is required.</span>
+            }
+          </div>
+
+          <div class="form-row two-col">
+            <div class="form-group">
+              <label for="job-resp" class="form-label">Responsibilities (one per line)</label>
+              <textarea
+                id="job-resp"
+                rows="4"
+                class="form-textarea"
+                formControlName="responsibilities"
+                placeholder="Design and build reactive Angular user interfaces&#10;Collaborate with cross-functional teams"
+              ></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="job-req" class="form-label">Requirements (one per line)</label>
+              <textarea
+                id="job-req"
+                rows="4"
+                class="form-textarea"
+                formControlName="requirements"
+                placeholder="3+ years production Angular experience&#10;Proficiency in TypeScript and RxJS"
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="form-row two-col">
+            <div class="form-group">
+              <label for="job-skills" class="form-label">Required Skills (comma separated)</label>
+              <input
+                id="job-skills"
+                type="text"
+                class="form-input"
+                formControlName="skills"
+                placeholder="Angular, TypeScript, Node.js, MongoDB"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="job-deadline" class="form-label">Application Deadline</label>
+              <input
+                id="job-deadline"
+                type="date"
+                class="form-input"
+                formControlName="applicationDeadline"
+              />
+            </div>
+          </div>
+
+          <div class="form-row two-col">
+            <div class="form-group">
+              <label for="job-status" class="form-label">Publishing Status *</label>
+              <select id="job-status" class="form-select" formControlName="status">
+                <option value="Active">Active (Visible to public job seekers)</option>
+                <option value="Draft">Draft (Private, only visible to you)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-actions-row">
+            <button
+              type="submit"
+              class="btn-primary"
+              [disabled]="isSubmitting() || !company()"
+            >
+              {{ editingJobId() ? 'Update Job Posting' : 'Publish Job Opportunity' }}
+            </button>
+            <button type="button" class="btn-outline" (click)="setTab('jobs')">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    }
+
+    <!-- ========================================================
+         TAB 3: COMPANY PROFILE
+    ======================================================== -->
+    @if (activeTab() === 'company') {
+      <div class="card form-card">
+        <div class="form-card-header">
+          <div>
+            <h2 class="card-title">{{ company() ? 'Company Profile' : 'Set Up Your Company Profile' }}</h2>
+            <p class="card-subtext">Your company details are attached to your job postings and shown to candidates.</p>
+          </div>
+        </div>
+
+        <form [formGroup]="companyForm" (ngSubmit)="saveCompany()" class="company-reactive-form">
+          <div class="form-row two-col">
+            <div class="form-group">
+              <label for="comp-name" class="form-label">Company Name *</label>
+              <input
+                id="comp-name"
+                type="text"
+                class="form-input"
+                formControlName="companyName"
+                placeholder="e.g. Acme Innovations Inc."
+              />
+              @if (companyForm.get('companyName')?.touched && companyForm.get('companyName')?.invalid) {
+                <span class="field-error">Company name is required (max 150 chars).</span>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="comp-industry" class="form-label">Industry</label>
+              <input
+                id="comp-industry"
+                type="text"
+                class="form-input"
+                formControlName="industry"
+                placeholder="e.g. Software & Technology"
+              />
+            </div>
+          </div>
+
+          <div class="form-row two-col">
+            <div class="form-group">
+              <label for="comp-site" class="form-label">Website URL</label>
+              <input
+                id="comp-site"
+                type="url"
+                class="form-input"
+                formControlName="website"
+                placeholder="https://acme.example.com"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="comp-loc" class="form-label">Headquarters / Location</label>
+              <input
+                id="comp-loc"
+                type="text"
+                class="form-input"
+                formControlName="location"
+                placeholder="e.g. Austin, TX"
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="comp-desc" class="form-label">About the Company</label>
+            <textarea
+              id="comp-desc"
+              rows="5"
+              class="form-textarea"
+              formControlName="description"
+              placeholder="Tell candidates about your company's mission, values, work culture, and perks..."
+            ></textarea>
+          </div>
+
+          <div class="form-actions-row">
+            <button
+              type="submit"
+              class="btn-primary"
+              [disabled]="isSubmitting()"
+            >
+              {{ company() ? 'Update Company Profile' : 'Create Company Profile' }}
+            </button>
+            <button type="button" class="btn-outline" (click)="setTab('jobs')">
+              Back to Jobs
+            </button>
+          </div>
+        </form>
+      </div>
+    }
+  </div>
+</div>
+
+<app-footer></app-footer>
