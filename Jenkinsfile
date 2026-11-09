@@ -69,54 +69,16 @@ pipeline {
 
         stage('Deploy Frontend') {
             steps {
-                sh '''
-                    set -e
-
-                    OUT=$(dirname "$(find client/dist -type f -name index.html -print -quit)")
-
-                    if [ -z "$OUT" ] || [ ! -f "$OUT/index.html" ]; then
-                        echo "ERROR: Angular build output not found"
-                        exit 1
-                    fi
-
-                    echo "Deploying frontend from: $OUT"
-
-                    sudo rsync -a --delete "$OUT"/ /var/www/angular-app/
-
-                    echo "Frontend deployment successful"
-                '''
-            }
+        sh 'sudo /usr/local/sbin/deploy-hirehub-frontend'   
+    }
         }
 
         // BACKEND DEPLOYMENT
 
         stage('Deploy Backend') {
             steps {
-                sh '''
-                    set -e
-
-                    echo "Deploying backend files..."
-
-                    sudo rsync -a --delete \
-                        --exclude='node_modules/' \
-                        --exclude='.env' \
-                        --exclude='.git/' \
-                        server/ /opt/hirehub/server/
-
-                    sudo chown -R hirehub:hirehub /opt/hirehub/server
-
-                    echo "Installing production dependencies..."
-
-                    sudo -u hirehub -H sh -c \
-                        'cd /opt/hirehub/server && npm ci --omit=dev'
-
-                    echo "Restarting backend service..."
-
-                    sudo systemctl restart hirehub-backend
-
-                    echo "Backend deployment successful"
-                '''
-            }
+        sh 'sudo /usr/local/sbin/deploy-hirehub-backend'
+    }
         }
 
         // DEPLOYMENT VERIFICATION
@@ -128,7 +90,7 @@ pipeline {
 
                     echo "Checking backend service..."
 
-                    sudo systemctl is-active --quiet hirehub-backend
+                    curl -fsS http://127.0.0.1:5000/api/health
 
                     echo "Checking backend API..."
 
