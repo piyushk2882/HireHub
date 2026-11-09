@@ -60,7 +60,7 @@ describe('ApplicationService', () => {
       expect(res.data.application._id).toBe(mockApp._id);
     });
 
-    const req = httpTesting.expectOne('http://localhost:5000/api/jobs/65f42c1234567890abcdef11/applications');
+    const req = httpTesting.expectOne('/api/jobs/65f42c1234567890abcdef11/applications');
     expect(req.request.method).toBe('POST');
     expect(req.request.withCredentials).toBe(true);
     req.flush({
@@ -94,7 +94,7 @@ describe('ApplicationService', () => {
     });
 
     const req = httpTesting.expectOne((r) =>
-      r.url === 'http://localhost:5000/api/applications/my-applications' &&
+      r.url === '/api/applications/my-applications' &&
       r.params.get('status') === 'Pending' &&
       r.params.get('page') === '1' &&
       r.params.get('sort') === 'newest'
@@ -129,7 +129,7 @@ describe('ApplicationService', () => {
     });
 
     const req = httpTesting.expectOne((r) =>
-      r.url === 'http://localhost:5000/api/jobs/65f42c1234567890abcdef11/applications' &&
+      r.url === '/api/jobs/65f42c1234567890abcdef11/applications' &&
       r.params.get('page') === '2' &&
       !r.params.has('status') // 'All' status should not be appended
     );
@@ -144,7 +144,7 @@ describe('ApplicationService', () => {
       expect(res.data.application._id).toBe(mockApp._id);
     });
 
-    const req = httpTesting.expectOne(`http://localhost:5000/api/applications/${mockApp._id}`);
+    const req = httpTesting.expectOne(`/api/applications/${mockApp._id}`);
     expect(req.request.method).toBe('GET');
     expect(req.request.withCredentials).toBe(true);
     req.flush({
@@ -161,7 +161,7 @@ describe('ApplicationService', () => {
       expect(blob.type).toBe('application/pdf');
     });
 
-    const req = httpTesting.expectOne(`http://localhost:5000/api/applications/${mockApp._id}/resume`);
+    const req = httpTesting.expectOne(`/api/applications/${mockApp._id}/resume`);
     expect(req.request.method).toBe('GET');
     expect(req.request.responseType).toBe('blob');
     expect(req.request.withCredentials).toBe(true);
@@ -188,7 +188,7 @@ describe('ApplicationService', () => {
       expect(res.data.application.status).toBe('Reviewed');
     });
 
-    const req = httpTesting.expectOne(`http://localhost:5000/api/applications/${mockApp._id}/status`);
+    const req = httpTesting.expectOne(`/api/applications/${mockApp._id}/status`);
     expect(req.request.method).toBe('PATCH');
     expect(req.request.body).toEqual({ status: 'Reviewed', note: 'Looks good' });
     expect(req.request.withCredentials).toBe(true);

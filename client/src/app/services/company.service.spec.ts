@@ -44,7 +44,7 @@ describe('CompanyService', () => {
     });
 
     const req = httpTesting.expectOne(r =>
-      r.url === 'http://localhost:5000/api/companies' &&
+      r.url === '/api/companies' &&
       r.params.get('recruiterId') === '507f1f77bcf86cd799439099'
     );
     expect(req.request.method).toBe('GET');
@@ -64,7 +64,7 @@ describe('CompanyService', () => {
       expect(res.data.company.companyName).toBe('Acme Innovations');
     });
 
-    const req = httpTesting.expectOne('http://localhost:5000/api/companies/507f1f77bcf86cd799439022');
+    const req = httpTesting.expectOne('/api/companies/507f1f77bcf86cd799439022');
     expect(req.request.method).toBe('GET');
     req.flush({ success: true, data: { company: mockCompany } });
   });
@@ -74,7 +74,7 @@ describe('CompanyService', () => {
       expect(res.success).toBe(true);
     });
 
-    const req = httpTesting.expectOne('http://localhost:5000/api/companies');
+    const req = httpTesting.expectOne('/api/companies');
     expect(req.request.method).toBe('POST');
     expect(req.request.withCredentials).toBe(true);
     req.flush({ success: true, data: { company: mockCompany } });
@@ -85,7 +85,7 @@ describe('CompanyService', () => {
       expect(res.success).toBe(true);
     });
 
-    const req = httpTesting.expectOne('http://localhost:5000/api/companies/507f1f77bcf86cd799439022');
+    const req = httpTesting.expectOne('/api/companies/507f1f77bcf86cd799439022');
     expect(req.request.method).toBe('PUT');
     expect(req.request.withCredentials).toBe(true);
     req.flush({ success: true, data: { company: { ...mockCompany, industry: 'FinTech' } } });

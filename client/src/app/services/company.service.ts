@@ -11,7 +11,7 @@ import {
   providedIn: 'root'
 })
 export class CompanyService {
-  private apiUrl = 'http://localhost:5000/api/companies';
+  private apiUrl = '/api/companies';
 
   constructor(private http: HttpClient) {}
 

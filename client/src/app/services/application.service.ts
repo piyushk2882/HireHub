@@ -13,8 +13,8 @@ import {
   providedIn: 'root'
 })
 export class ApplicationService {
-  private baseJobsUrl = 'http://localhost:5000/api/jobs';
-  private baseApplicationsUrl = 'http://localhost:5000/api/applications';
+  private baseJobsUrl = '/api/jobs';
+  private baseApplicationsUrl = '/api/applications';
 
   constructor(private http: HttpClient) {}
 

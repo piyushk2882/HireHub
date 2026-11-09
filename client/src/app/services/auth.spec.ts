@@ -76,7 +76,7 @@ describe('AuthService (Cookie-Only Authentication)', () => {
         expect(res.data?.user.email).toBe('jane@example.com');
       });
 
-      const req = httpTesting.expectOne('http://localhost:5000/api/auth/register');
+      const req = httpTesting.expectOne('/api/auth/register');
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual(payload);
       expect(req.request.withCredentials).toBe(true);
@@ -106,7 +106,7 @@ describe('AuthService (Cookie-Only Authentication)', () => {
         }
       });
 
-      const req = httpTesting.expectOne('http://localhost:5000/api/auth/register');
+      const req = httpTesting.expectOne('/api/auth/register');
       req.flush({ message: 'Validation failed' }, { status: 400, statusText: 'Bad Request' });
       expect(errorOccurred).toBe(true);
     });
@@ -120,7 +120,7 @@ describe('AuthService (Cookie-Only Authentication)', () => {
         expect(res.success).toBe(true);
       });
 
-      const req = httpTesting.expectOne('http://localhost:5000/api/auth/login');
+      const req = httpTesting.expectOne('/api/auth/login');
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual(creds);
       expect(req.request.withCredentials).toBe(true);
@@ -137,7 +137,7 @@ describe('AuthService (Cookie-Only Authentication)', () => {
 
       service.logout().subscribe();
 
-      const req = httpTesting.expectOne('http://localhost:5000/api/auth/logout');
+      const req = httpTesting.expectOne('/api/auth/logout');
       expect(req.request.method).toBe('POST');
       expect(req.request.withCredentials).toBe(true);
       req.flush({ success: true });
@@ -153,7 +153,7 @@ describe('AuthService (Cookie-Only Authentication)', () => {
         expect(user).toEqual(mockUser);
       });
 
-      const req = httpTesting.expectOne('http://localhost:5000/api/auth/me');
+      const req = httpTesting.expectOne('/api/auth/me');
       expect(req.request.method).toBe('GET');
       expect(req.request.withCredentials).toBe(true);
       req.flush({ success: true, data: { user: mockUser } });
@@ -167,7 +167,7 @@ describe('AuthService (Cookie-Only Authentication)', () => {
         expect(user).toBeNull();
       });
 
-      const req = httpTesting.expectOne('http://localhost:5000/api/auth/me');
+      const req = httpTesting.expectOne('/api/auth/me');
       req.flush({ message: 'Unauthorized' }, { status: 401, statusText: 'Unauthorized' });
 
       expect(service.currentUser()).toBeNull();

@@ -74,7 +74,7 @@ describe('NotificationService', () => {
 
     expect(service.loading()).toBe(true);
 
-    const req = httpTesting.expectOne('http://localhost:5000/api/notifications?page=1&limit=10');
+    const req = httpTesting.expectOne('/api/notifications?page=1&limit=10');
     expect(req.request.method).toBe('GET');
     expect(req.request.withCredentials).toBe(true);
 
@@ -100,7 +100,7 @@ describe('NotificationService', () => {
       expect(service.unreadCount()).toBe(5);
     });
 
-    const req = httpTesting.expectOne('http://localhost:5000/api/notifications/unread-count');
+    const req = httpTesting.expectOne('/api/notifications/unread-count');
     expect(req.request.method).toBe('GET');
     req.flush({ success: true, data: { unreadCount: 5 } });
   });
@@ -115,7 +115,7 @@ describe('NotificationService', () => {
       expect(service.unreadCount()).toBe(1);
     });
 
-    const req = httpTesting.expectOne(`http://localhost:5000/api/notifications/${mockNotification._id}/read`);
+    const req = httpTesting.expectOne(`/api/notifications/${mockNotification._id}/read`);
     expect(req.request.method).toBe('PATCH');
     req.flush({
       success: true,
@@ -138,7 +138,7 @@ describe('NotificationService', () => {
       expect(service.unreadCount()).toBe(0);
     });
 
-    const req = httpTesting.expectOne('http://localhost:5000/api/notifications/read-all');
+    const req = httpTesting.expectOne('/api/notifications/read-all');
     expect(req.request.method).toBe('PATCH');
     req.flush({ success: true, data: { modifiedCount: 2 } });
   });
@@ -153,7 +153,7 @@ describe('NotificationService', () => {
       expect(service.unreadCount()).toBe(0);
     });
 
-    const req = httpTesting.expectOne(`http://localhost:5000/api/notifications/${mockNotification._id}`);
+    const req = httpTesting.expectOne(`/api/notifications/${mockNotification._id}`);
     expect(req.request.method).toBe('DELETE');
     req.flush({ success: true, message: 'Notification deleted successfully' });
   });
@@ -165,7 +165,7 @@ describe('NotificationService', () => {
       expect(service.preferences()?.emailNotificationsEnabled).toBe(true);
     });
 
-    const req = httpTesting.expectOne('http://localhost:5000/api/notifications/preferences');
+    const req = httpTesting.expectOne('/api/notifications/preferences');
     expect(req.request.method).toBe('GET');
     req.flush({
       success: true,
@@ -181,7 +181,7 @@ describe('NotificationService', () => {
       expect(service.preferences()?.emailNotificationsEnabled).toBe(false);
     });
 
-    const req = httpTesting.expectOne('http://localhost:5000/api/notifications/preferences');
+    const req = httpTesting.expectOne('/api/notifications/preferences');
     expect(req.request.method).toBe('PATCH');
     expect(req.request.body).toEqual({ emailNotificationsEnabled: false });
 

@@ -12,7 +12,7 @@ import {
   providedIn: 'root'
 })
 export class JobService {
-  private apiUrl = 'http://localhost:5000/api/jobs';
+  private apiUrl = '/api/jobs';
 
   constructor(private http: HttpClient) {}
 

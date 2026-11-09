@@ -20,7 +20,7 @@ import { PaginationMetadata } from '../models/job.model';
 export class NotificationService implements OnDestroy {
   private http = inject(HttpClient);
   private authService = inject(AuthService);
-  private apiUrl = 'http://localhost:5000/api/notifications';
+  private apiUrl = '/api/notifications';
 
   // Reactive Signals
   notifications = signal<AppNotification[]>([]);

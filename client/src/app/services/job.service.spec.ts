@@ -73,7 +73,7 @@ describe('JobService', () => {
     });
 
     const req = httpTesting.expectOne(r =>
-      r.url === 'http://localhost:5000/api/jobs' &&
+      r.url === '/api/jobs' &&
       r.params.get('search') === 'Angular' &&
       r.params.get('category') === 'Development' &&
       r.params.get('page') === '1'
@@ -95,7 +95,7 @@ describe('JobService', () => {
       expect(res.data.job._id).toBe('507f1f77bcf86cd799439011');
     });
 
-    const req = httpTesting.expectOne('http://localhost:5000/api/jobs/507f1f77bcf86cd799439011');
+    const req = httpTesting.expectOne('/api/jobs/507f1f77bcf86cd799439011');
     expect(req.request.method).toBe('GET');
     expect(req.request.withCredentials).toBe(true);
     req.flush(mockResponse);
@@ -117,7 +117,7 @@ describe('JobService', () => {
     });
 
     const req = httpTesting.expectOne(r =>
-      r.url === 'http://localhost:5000/api/jobs/my-jobs' &&
+      r.url === '/api/jobs/my-jobs' &&
       r.params.get('status') === 'Active'
     );
     expect(req.request.method).toBe('GET');
@@ -138,7 +138,7 @@ describe('JobService', () => {
       expect(res.success).toBe(true);
     });
 
-    const req = httpTesting.expectOne('http://localhost:5000/api/jobs');
+    const req = httpTesting.expectOne('/api/jobs');
     expect(req.request.method).toBe('POST');
     expect(req.request.withCredentials).toBe(true);
     expect(req.request.body.title).toBe('UI Designer');
@@ -150,7 +150,7 @@ describe('JobService', () => {
       expect(res.success).toBe(true);
     });
 
-    const req = httpTesting.expectOne('http://localhost:5000/api/jobs/507f1f77bcf86cd799439011');
+    const req = httpTesting.expectOne('/api/jobs/507f1f77bcf86cd799439011');
     expect(req.request.method).toBe('PUT');
     expect(req.request.withCredentials).toBe(true);
     req.flush({ success: true, message: 'Updated', data: { job: { ...mockJob, title: 'Lead Angular Developer' } } });
@@ -161,7 +161,7 @@ describe('JobService', () => {
       expect(res.success).toBe(true);
     });
 
-    const req = httpTesting.expectOne('http://localhost:5000/api/jobs/507f1f77bcf86cd799439011/status');
+    const req = httpTesting.expectOne('/api/jobs/507f1f77bcf86cd799439011/status');
     expect(req.request.method).toBe('PATCH');
     expect(req.request.withCredentials).toBe(true);
     expect(req.request.body).toEqual({ status: 'Closed' });
@@ -174,7 +174,7 @@ describe('JobService', () => {
       expect(res.data.action).toBe('deleted');
     });
 
-    const req = httpTesting.expectOne('http://localhost:5000/api/jobs/507f1f77bcf86cd799439011');
+    const req = httpTesting.expectOne('/api/jobs/507f1f77bcf86cd799439011');
     expect(req.request.method).toBe('DELETE');
     expect(req.request.withCredentials).toBe(true);
     req.flush({ success: true, message: 'Deleted', data: { action: 'deleted' } });

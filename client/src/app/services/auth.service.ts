@@ -8,7 +8,7 @@ import { AuthResponse, User, UserRole } from '../models/user.model';
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:5000/api/auth';
+  private apiUrl = '/api/auth';
   private checkAuthInProgress$: Observable<User | null> | null = null;
 
   // Reactive state signals
