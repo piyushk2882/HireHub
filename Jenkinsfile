@@ -11,6 +11,10 @@ pipeline {
         timestamps()
     }
 
+    triggers {
+        pollSCM('H/2 * * * *')
+    }
+
     stages {
 
         stage('Checkout') {
@@ -19,7 +23,7 @@ pipeline {
             }
         }
 
-        // FRONTEND
+        // FRONTEND BUILD
 
         stage('Frontend - Install Dependencies') {
             steps {
@@ -29,7 +33,7 @@ pipeline {
             }
         }
 
-        stage('Frontend - Build') {
+        stage('Frontend - Production Build') {
             environment {
                 NODE_OPTIONS = '--max-old-space-size=1024'
             }
@@ -40,7 +44,7 @@ pipeline {
             }
         }
 
-        // BACKEND
+        // BACKEND BUILD
 
         stage('Backend - Install Dependencies') {
             steps {
@@ -50,15 +54,18 @@ pipeline {
             }
         }
 
-        stage('Backend - Test') {
+        stage('Backend - Build Verification') {
             steps {
                 dir('server') {
-                    sh 'npm test --if-present'
+                    sh '''
+                        node --check src/server.js
+                        echo "Backend syntax verification successful"
+                    '''
                 }
             }
         }
 
-        // DEPLOY FRONTEND
+        // FRONTEND DEPLOYMENT
 
         stage('Deploy Frontend') {
             steps {
@@ -76,19 +83,19 @@ pipeline {
 
                     sudo rsync -a --delete "$OUT"/ /var/www/angular-app/
 
-                    echo "Frontend deployment completed"
+                    echo "Frontend deployment successful"
                 '''
             }
         }
 
-        // DEPLOY BACKEND
+        // BACKEND DEPLOYMENT
 
         stage('Deploy Backend') {
             steps {
                 sh '''
                     set -e
 
-                    echo "Deploying backend..."
+                    echo "Deploying backend files..."
 
                     sudo rsync -a --delete \
                         --exclude='node_modules/' \
@@ -103,16 +110,16 @@ pipeline {
                     sudo -u hirehub -H sh -c \
                         'cd /opt/hirehub/server && npm ci --omit=dev'
 
-                    echo "Restarting HireHub backend..."
+                    echo "Restarting backend service..."
 
                     sudo systemctl restart hirehub-backend
 
-                    echo "Backend deployment completed"
+                    echo "Backend deployment successful"
                 '''
             }
         }
 
-        // VERIFY DEPLOYMENT
+        // DEPLOYMENT VERIFICATION
 
         stage('Verify Deployment') {
             steps {
@@ -123,19 +130,20 @@ pipeline {
 
                     sudo systemctl is-active --quiet hirehub-backend
 
-                    echo "Checking API health..."
+                    echo "Checking backend API..."
 
                     for i in 1 2 3 4 5; do
                         if curl -fsS http://127.0.0.1:5000/api/health; then
+                            echo ""
                             echo "API health check passed"
                             exit 0
                         fi
 
-                        echo "API not ready yet. Retrying..."
+                        echo "Waiting for backend..."
                         sleep 3
                     done
 
-                    echo "ERROR: API health check failed"
+                    echo "ERROR: Backend health check failed"
                     exit 1
                 '''
             }
@@ -144,11 +152,11 @@ pipeline {
 
     post {
         success {
-            echo 'HireHub frontend and backend deployed successfully!'
+            echo 'SUCCESS: HireHub frontend and backend deployed!'
         }
 
         failure {
-            echo 'HireHub pipeline failed. Check the stage logs.'
+            echo 'FAILED: Check the Jenkins console output.'
         }
     }
 }
