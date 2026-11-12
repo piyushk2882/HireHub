@@ -9,6 +9,7 @@ pipeline {
     options {
         skipDefaultCheckout(true)
         timestamps()
+        disableConcurrentBuilds()
     }
 
     triggers {
@@ -68,10 +69,17 @@ pipeline {
         // FRONTEND DEPLOYMENT
 
         stage('Deploy Frontend') {
-            steps {
-        sh 'sudo /usr/local/sbin/deploy-hirehub-frontend'   
+    steps {
+        sh '''
+            set -e
+
+            echo "Jenkins workspace: $WORKSPACE"
+
+            sudo /usr/local/sbin/deploy-hirehub-frontend \
+                "$WORKSPACE/client/dist/client/browser"
+        '''
     }
-        }
+}   
 
         // BACKEND DEPLOYMENT
 
